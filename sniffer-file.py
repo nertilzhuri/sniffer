@@ -36,6 +36,7 @@ interface = "wlan1mon"
 # Next, declare a Python list to keep track of client MAC addresses
 # that we have already seen so we only print the address once per client.
 observedclients = []
+observedssid = []
 
 def countclients():
     while(True):
@@ -58,12 +59,16 @@ def sendclients():
                 copyclients = observedclients[:]
                 observedclients = []
 
+		copyssid = observedssid[:]
+		observedssid = []
+
                 #continue with copyclients
                 values = { 'clients': copyclients, 'location':  map_location}
 
 		fl = open('clients.txt', 'a')
+		cnt = 0
 		for clnt in copyclients:
-			fl.write(str(clnt)+" "+str(time.strftime('%Y-%m-%d %H:%M:%s'))+"\n")
+			fl.write(str(clnt)+" "+str(copyssid[cnt])+" "+str(time.strftime('%Y-%m-%d %H:%M:%s'))+"\n")
 		fl.write("\n")
 		fl.close()
 		
@@ -108,8 +113,9 @@ def sniffmgmt(p):
             # client address isn't present, print the address and then add
             # it to our list.
             if p.addr2 not in observedclients:
-                print p.addr2
+                print str(p.addr2)+" "+str(p.info)
                 observedclients.append(p.addr2)
+		observedssid.append(p.info)
 
 #run as thread the countclients
 t = threading.Thread(target=countclients)
